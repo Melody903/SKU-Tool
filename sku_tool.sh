@@ -2,17 +2,20 @@
 # Apple MacBook SKU Generator 
 # Melody's SKU Tool
 
-
 CSV_URL="https://raw.githubusercontent.com/Melody903/SKU-Tool/main/Apple%20SKU%20Key%20-%20Key.csv"
 CSV_FILE="/tmp/apple_sku_key.csv"
 
-# Download the CSV if it’s missing or outdated
+# Check if CSV already exists
 if [ ! -f "$CSV_FILE" ]; then
   echo "⬇️  Downloading Apple SKU CSV from GitHub..."
-  curl -fsSL "$CSV_URL" -o "$CSV_FILE" || {
-    echo "❌ Failed to download CSV file from GitHub."
+  if curl -fsSL "$CSV_URL" -o "$CSV_FILE"; then
+    echo "✅ CSV successfully downloaded and cached at $CSV_FILE"
+  else
+    echo "❌ Failed to download CSV file from GitHub. Please check your connection or URL."
     exit 1
-  }
+  fi
+else
+  echo "📂 Using cached Apple SKU CSV from $CSV_FILE"
 fi
 
 trim() { printf "%s" "$1" | awk '{$1=$1; print}'; }
