@@ -4,7 +4,6 @@
 
 
 CSV_URL="https://raw.githubusercontent.com/Melody903/SKU-Tool/main/Apple%20SKU%20Key%20-%20Key.csv"
-CSV_FILE="Apple SKU Key - Key.csv"
 
 if [ ! -f "$CSV_FILE" ]; then
   echo "❌ CSV file '$CSV_FILE' not found in current directory!"
