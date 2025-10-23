@@ -279,6 +279,7 @@ lookup_by_emc() {
   }' "$CSV_FILE"
 }
 
+# === MODEL ORDER LOOKUP FUNCTION ===
 find_model_order() {
   printf "Enter Model Basic (e.g., A1706): "
   read model_basic
@@ -291,7 +292,7 @@ find_model_order() {
 
   tmp=$(mktemp)
   awk -F, -v mb="$model_basic" -v cq="$cpuq" 'BEGIN{IGNORECASE=1} NR>1 {
-    if ($9 == mb) {
+    if (tolower($9) == tolower(mb)) {
       low_cpu = tolower($4); low_gpu = tolower($5); low_q = tolower(cq)
       if (low_q == "" || index(low_cpu, low_q) > 0 || index(low_gpu, low_q) > 0)
         print $0
@@ -306,10 +307,10 @@ find_model_order() {
     echo "Multiple matches found for $model_basic:"
     i=1
     while IFS= read -r line; do
-      cpuv=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$4); print $4}')
-      gpuv=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$5); print $5}')
-      model=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$1); print $1}')
-      yearv=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$6); print $6}')
+      cpuv=$(printf "%s" "$line" | awk -F, '{gsub(/^"|"$/,"",$4); print $4}')
+      gpuv=$(printf "%s" "$line" | awk -F, '{gsub(/^"|"$/,"",$5); print $5}')
+      model=$(printf "%s" "$line" | awk -F, '{gsub(/^"|"$/,"",$1); print $1}')
+      yearv=$(printf "%s" "$line" | awk -F, '{gsub(/^"|"$/,"",$6); print $6}')
       printf "  %d) %s — %s — %s (%s)\n" "$i" "$cpuv" "$gpuv" "$model" "$yearv"
       i=$((i+1))
     done < "$tmp"
@@ -385,7 +386,6 @@ PY
   printf "║ %-15s: %-48.48s ║\n" "Battery Code" "$battery_val"
   echo "╚$(printf '═%.0s' $(seq 1 70))╝"
 }
-
 
 while true; do
 echo ""
