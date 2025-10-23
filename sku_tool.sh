@@ -4,17 +4,16 @@
 
 
 CSV_URL="https://raw.githubusercontent.com/Melody903/SKU-Tool/main/Apple%20SKU%20Key%20-%20Key.csv"
+CSV_FILE="/tmp/apple_sku_key.csv"
 
+# Download the CSV if it’s missing or outdated
 if [ ! -f "$CSV_FILE" ]; then
-  echo "❌ CSV file '$CSV_FILE' not found in current directory!"
-  exit 1
-  echo "🔽 CSV file not found, downloading..."
-  curl -fsSL -o "$CSV_FILE" "$CSV_URL" || {
-    echo "❌ Failed to download CSV from $CSV_URL"
+  echo "⬇️  Downloading Apple SKU CSV from GitHub..."
+  curl -fsSL "$CSV_URL" -o "$CSV_FILE" || {
+    echo "❌ Failed to download CSV file from GitHub."
     exit 1
   }
 fi
-
 
 trim() { printf "%s" "$1" | awk '{$1=$1; print}'; }
 
