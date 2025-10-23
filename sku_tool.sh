@@ -392,7 +392,7 @@ PY
   printf "║ %-68s ║\n" "MODEL ORDER LOOKUP"
   echo "╠$(printf '═%.0s' $(seq 1 70))╣"
   printf "║ %-15s: %-48.48s ║\n" "MODEL ORDER" "$model_order"
-  printf "║ %-15s: %-48.48s ║\n" "MODEL ORDER" "$base_sku"
+  printf "║ %-15s: %-48.48s ║\n" "BASE SKU" "$base_sku"
   printf "║ %-15s: %-48.48s ║\n" "MODEL" "$model"
   printf "║ %-15s: %-48.48s ║\n" "MODEL BASIC" "$model_basic_out"
   printf "║ %-15s: %-48.48s ║\n" "MODEL EMC" "$model_emc"
