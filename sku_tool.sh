@@ -153,13 +153,13 @@ generate_sku() {
 
   tmp=$(mktemp)
   awk -F, -v mb="$model_basic" -v cq="$cpuq" 'BEGIN{IGNORECASE=1} NR>1 {
-    if ($9 == mb) {
+    if (tolower($9) == tolower(mb)) {
       low_cpu = tolower($4); low_gpu = tolower($5); low_q = tolower(cq)
       if (low_q == "" || index(low_cpu, low_q) > 0 || index(low_gpu, low_q) > 0)
         print $0
     }
   }' "$CSV_FILE" > "$tmp"
-
+  
   count=$(wc -l < "$tmp" | tr -d ' ')
   [ "$count" -eq 0 ] && { echo "No matches found."; rm -f "$tmp"; return; }
 
