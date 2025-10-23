@@ -1,18 +1,13 @@
 #!/bin/sh
-# Apple MacBook SKU Generator — Enhanced Menu Version
-# Melody's SKU Tool with robust CSV parsing, full menu, and battery/charger display
+# Apple MacBook SKU Generator 
+# Melody's SKU Tool
 
 CSV_FILE="Apple SKU Key - Key.csv"
-CSV_URL="https://raw.githubusercontent.com/Melody903/SKU-Tool/main/Apple%20SKU%20Key%20-%20Key.csv"
 
 if [ ! -f "$CSV_FILE" ]; then
-  echo "🔽 CSV file not found, downloading..."
-  curl -fsSL -o "$CSV_FILE" "$CSV_URL" || {
-    echo "❌ Failed to download CSV from $CSV_URL"
-    exit 1
-  }
+  echo "❌ CSV file '$CSV_FILE' not found in current directory!"
+  exit 1
 fi
-
 
 trim() { printf "%s" "$1" | awk '{$1=$1; print}'; }
 
@@ -284,24 +279,134 @@ lookup_by_emc() {
   }' "$CSV_FILE"
 }
 
+find_model_order() {
+  printf "Enter Model Basic (e.g., A1706): "
+  read model_basic
+  model_basic=$(trim "$model_basic")
+  [ -z "$model_basic" ] && { echo "Model Basic required."; return; }
+
+  printf "Enter CPU (partial ok, leave blank to list all for Model Basic): "
+  read cpuq
+  cpuq=$(trim "$cpuq")
+
+  tmp=$(mktemp)
+  awk -F, -v mb="$model_basic" -v cq="$cpuq" 'BEGIN{IGNORECASE=1} NR>1 {
+    if ($9 == mb) {
+      low_cpu = tolower($4); low_gpu = tolower($5); low_q = tolower(cq)
+      if (low_q == "" || index(low_cpu, low_q) > 0 || index(low_gpu, low_q) > 0)
+        print $0
+    }
+  }' "$CSV_FILE" > "$tmp"
+
+  count=$(wc -l < "$tmp" | tr -d ' ')
+  [ "$count" -eq 0 ] && { echo "No matches found."; rm -f "$tmp"; return; }
+
+  if [ "$count" -gt 1 ]; then
+    echo ""
+    echo "Multiple matches found for $model_basic:"
+    i=1
+    while IFS= read -r line; do
+      cpuv=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$4); print $4}')
+      gpuv=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$5); print $5}')
+      model=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$1); print $1}')
+      yearv=$(printf "%s" "$line" | awk -F, '{gsub(/^\"|\"$/,"",$6); print $6}')
+      printf "  %d) %s — %s — %s (%s)\n" "$i" "$cpuv" "$gpuv" "$model" "$yearv"
+      i=$((i+1))
+    done < "$tmp"
+    printf "Enter the number to use that CPU/GPU, or 0 to cancel: "
+    read sel
+    [ "$sel" -eq 0 ] && { echo "Cancelled."; rm -f "$tmp"; return; }
+    line=$(awk "NR==$sel {print; exit}" "$tmp")
+  else
+    line=$(cat "$tmp")
+  fi
+  rm -f "$tmp"
+
+  model=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[0] if len(r)>0 else "")
+PY
+)
+  model_order=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[1] if len(r)>1 else "")
+PY
+)
+  cpu_val=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[3] if len(r)>3 else "")
+PY
+)
+  gpu_val=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[4] if len(r)>4 else "")
+PY
+)
+  year_val=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[5] if len(r)>5 else "")
+PY
+)
+  model_basic_out=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[8] if len(r)>8 else "")
+PY
+)
+  model_emc=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[9] if len(r)>9 else "")
+PY
+)
+  battery_val=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[11] if len(r)>11 else "")
+PY
+)
+
+  # === Clean Lookup Box ===
+  echo "╔$(printf '═%.0s' $(seq 1 70))╗"
+  printf "║ %-68s ║\n" "MODEL ORDER LOOKUP"
+  echo "╠$(printf '═%.0s' $(seq 1 70))╣"
+  printf "║ %-15s: %-48.48s ║\n" "MODEL ORDER" "$model_order"
+  printf "║ %-15s: %-48.48s ║\n" "MODEL" "$model"
+  printf "║ %-15s: %-48.48s ║\n" "MODEL BASIC" "$model_basic_out"
+  printf "║ %-15s: %-48.48s ║\n" "MODEL EMC" "$model_emc"
+  printf "║ %-15s: %-48.48s ║\n" "YEAR" "$year_val"
+  printf "║ %-15s: %-48.48s ║\n" "CPU" "$cpu_val"
+  printf "║ %-15s: %-48.48s ║\n" "GPU" "$gpu_val"
+  printf "║ %-15s: %-48.48s ║\n" "Battery Code" "$battery_val"
+  echo "╚$(printf '═%.0s' $(seq 1 70))╝"
+}
+
+
 while true; do
-  echo ""
-  echo "=== MAIN MENU ==="
-  echo "1. Generate SKU Code"
-  echo "2. View Available Models"
-  echo "3. View Configuration Options"
-  echo "4. Lookup by Base SKU"
-  echo "5. Lookup by EMC"
-  echo "6. Exit"
-  printf "Choose: "
-  read choice
-  case "$choice" in
-    1) generate_sku ;;
-    2) view_models ;;
-    3) view_config_options ;;
-    4) lookup_by_base ;;
-    5) lookup_by_emc ;;
-    6) echo "Goodbye!"; exit 0 ;;
-    *) echo "Invalid choice." ;;
-  esac
+echo ""
+echo "=== MAIN MENU ==="
+echo "1. Generate SKU Code"
+echo "2. View Available Models"
+echo "3. View Configuration Options"
+echo "4. Lookup by Base SKU"
+echo "5. Lookup by EMC"
+echo "6. Find Model Order"
+echo "7. Exit"
+printf "Choose: "
+read choice
+case "$choice" in
+1) generate_sku ;;
+2) view_models ;;
+3) view_config_options ;;
+4) lookup_by_base ;;
+5) lookup_by_emc ;;
+6) find_model_order ;;
+7) echo "Goodbye!"; exit 0 ;;
+*) echo "Invalid choice." ;;
+esac
 done
