@@ -397,25 +397,108 @@ PY
 }
 
 while true; do
-echo ""
-echo "=== MAIN MENU ==="
-echo "1. Generate SKU Code"
-echo "2. View Available Models"
-echo "3. View Configuration Options"
-echo "4. Lookup by Base SKU"
-echo "5. Lookup by EMC"
-echo "6. Find Model Order"
-echo "7. Exit"
-printf "Choose: "
-read choice
-case "$choice" in
-1) generate_sku ;;
-2) view_models ;;
-3) view_config_options ;;
-4) lookup_by_base ;;
-5) lookup_by_emc ;;
-6) find_model_order ;;
-7) echo "Goodbye!"; exit 0 ;;
-*) echo "Invalid choice." ;;
-esac
+  echo ""
+  echo "=== MAIN MENU ==="
+  echo "1. Generate SKU Code"
+  echo "2. View Available Models"
+  echo "3. View Configuration Options"
+  echo "4. Lookup by Base SKU"
+  echo "5. Lookup by EMC"
+  echo "6. Find Model Order"
+  echo "7. Exit"
+  printf "Choose: "
+  read choice
+  case "$choice" in
+    1)
+      while true; do
+        clear
+        generate_sku
+        echo ""
+        printf "Press [Enter] to generate another SKU, or type Q to return to main menu: "
+        read ans
+        [ -z "$ans" ] && continue
+        case "$ans" in
+          [Qq]) break ;;
+          *) continue ;;
+        esac
+      done
+      ;;
+    2)
+      while true; do
+        clear
+        view_models
+        echo ""
+        printf "Press [Enter] to view again, or type Q to return to main menu: "
+        read ans
+        [ -z "$ans" ] && continue
+        case "$ans" in
+          [Qq]) break ;;
+          *) continue ;;
+        esac
+      done
+      ;;
+    3)
+      while true; do
+        clear
+        view_config_options
+        echo ""
+        printf "Press [Enter] to view again, or type Q to return to main menu: "
+        read ans
+        [ -z "$ans" ] && continue
+        case "$ans" in
+          [Qq]) break ;;
+          *) continue ;;
+        esac
+      done
+      ;;
+    4)
+      while true; do
+        clear
+        lookup_by_base
+        echo ""
+        printf "Press [Enter] to lookup another Base SKU, or type Q to return to main menu: "
+        read ans
+        [ -z "$ans" ] && continue
+        case "$ans" in
+          [Qq]) break ;;
+          *) continue ;;
+        esac
+      done
+      ;;
+    5)
+      while true; do
+        clear
+        lookup_by_emc
+        echo ""
+        printf "Press [Enter] to lookup another EMC, or type Q to return to main menu: "
+        read ans
+        [ -z "$ans" ] && continue
+        case "$ans" in
+          [Qq]) break ;;
+          *) continue ;;
+        esac
+      done
+      ;;
+    6)
+      while true; do
+        clear
+        find_model_order
+        echo ""
+        printf "Press [Enter] to look up another model order, or type Q to return to main menu: "
+        read ans
+        [ -z "$ans" ] && continue
+        case "$ans" in
+          [Qq]) break ;;
+          *) continue ;;
+        esac
+      done
+      ;;
+    7)
+      echo "Goodbye!"
+      exit 0
+      ;;
+    *)
+      echo "Invalid choice."
+      ;;
+  esac
 done
