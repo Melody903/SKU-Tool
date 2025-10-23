@@ -2,12 +2,17 @@
 # Apple MacBook SKU Generator — Enhanced Menu Version
 # Melody's SKU Tool with robust CSV parsing, full menu, and battery/charger display
 
-CSV_URL="https://github.com/Melody903/SKU-Tool/blob/main/Apple%20SKU%20Key%20-%20Key.csv"
+CSV_FILE="Apple SKU Key - Key.csv"
+CSV_URL="https://raw.githubusercontent.com/Melody903/SKU-Tool/main/Apple%20SKU%20Key%20-%20Key.csv"
 
 if [ ! -f "$CSV_FILE" ]; then
-  echo "❌ CSV file '$CSV_FILE' not found in current directory!"
-  exit 1
+  echo "🔽 CSV file not found, downloading..."
+  curl -fsSL -o "$CSV_FILE" "$CSV_URL" || {
+    echo "❌ Failed to download CSV from $CSV_URL"
+    exit 1
+  }
 fi
+
 
 trim() { printf "%s" "$1" | awk '{$1=$1; print}'; }
 
