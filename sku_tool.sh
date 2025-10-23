@@ -344,6 +344,12 @@ r = next(csv.reader([os.environ['LINE']]))
 print(r[1] if len(r)>1 else "")
 PY
 )
+  base_sku=$(LINE="$line" python3 - <<'PY'
+import os, csv
+r = next(csv.reader([os.environ['LINE']]))
+print(r[2] if len(r)>2 else "")
+PY
+)
   cpu_val=$(LINE="$line" python3 - <<'PY'
 import os, csv
 r = next(csv.reader([os.environ['LINE']]))
@@ -386,6 +392,7 @@ PY
   printf "║ %-68s ║\n" "MODEL ORDER LOOKUP"
   echo "╠$(printf '═%.0s' $(seq 1 70))╣"
   printf "║ %-15s: %-48.48s ║\n" "MODEL ORDER" "$model_order"
+  printf "║ %-15s: %-48.48s ║\n" "MODEL ORDER" "$base_sku"
   printf "║ %-15s: %-48.48s ║\n" "MODEL" "$model"
   printf "║ %-15s: %-48.48s ║\n" "MODEL BASIC" "$model_basic_out"
   printf "║ %-15s: %-48.48s ║\n" "MODEL EMC" "$model_emc"
