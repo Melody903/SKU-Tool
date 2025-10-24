@@ -146,7 +146,7 @@ lookup_by_base() {
   echo ""
   echo "Matches for Base SKU $bsku:"
   awk -F, -v bsku="$bsku" 'NR>1 && $3==bsku {
-    printf "%-18s — %-6s — %-25s — %s — Battery: %s\n", $1, $2, $9, $4, $6, $12
+    printf "%-18s — %-6s — %-25s — %s — Battery: %s\n", $1, $2, $9, $4, $6, $12, $3
   }' "$CSV_FILE"
 }
 
